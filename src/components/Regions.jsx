@@ -1,14 +1,18 @@
-import { Checkbox, FormControlLabel } from '@mui/material';
+import { Checkbox, IconButton } from '@mui/material';
 import React, { useMemo, useState } from 'react';
+import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material';
 
-const Regions = ({ data, sport, games }) => {
+const Regions = ({ data, sport, games, checked }) => {
+    const [openRegions, setOpenRegions] = useState({});
     const [region, setRegion] = useState();
 
     const regions = useMemo(() => data && Object.values(data), [data]);
-    const champs = useMemo(() => region && data[region]?.Champs && Object.values(data[region].Champs), [data, region]);
 
-    const toggleSport = (e) => {
-        data.checked = e.target.checked;
+    const toggleSport = e => data.checked = e.target.checked;
+    const toggleRegionStatus = id => {
+        openRegions[id] = !openRegions[id]
+
+        setOpenRegions({ ...openRegions });
     };
 
     return (
@@ -17,37 +21,36 @@ const Regions = ({ data, sport, games }) => {
                 <div className="header">
                     <span>{sport}</span>
                     <div className="end">
-                        <span>{games}</span>
-                        <Checkbox color="error" checked={data.checked} onChange={toggleSport} />
+                        <Checkbox color="error" indeterminate={false} checked={checked} onChange={toggleSport} />
+                        <span className="count">{games}</span>
                     </div>
                 </div>
                 <div className="list">
                     {regions.map(item => (
                         <>
                             <div key={item.ID} className="item" onClick={() => setRegion(item.ID)}>
-                                {item.Name}
-                                <FormControlLabel
-                                    label="Parent"
-                                    control={
-                                        <Checkbox
-                                            checked={true && false}
-                                            indeterminate={true}
-                                            onChange={(e) => console.log(e)}
-                                        />
-                                    }
-                                />
-                            </div>
-                            <div className="chams">
-                                {champs && champs.map(item => (
+                                <div className="head">
                                     <div>
+                                        <span country={item.KeyName.toLowerCase()} className="flag"></span>
                                         {item.Name}
-
-                                        <FormControlLabel
-                                            label="Child 1"
-                                            control={<Checkbox checked={false} onChange={(e) => console.log(e)} />}
+                                    </div>
+                                    <div className="action">
+                                        <Checkbox className="checkbox" color="error" indeterminate={false} checked={data.checked} onChange={toggleSport} />
+                                        <IconButton
+                                            className="drop-icon"
+                                            onClick={() => toggleRegionStatus(item.ID)}
+                                            children={openRegions[item.ID] ? <ArrowDropUp /> : <ArrowDropDown />}
                                         />
                                     </div>
-                                ))}
+                                </div>
+                                <div className="chams">
+                                    {openRegions[item.ID] && Object.values(item.Champs).map(item => (
+                                        <div className="item">
+                                            {item.Name}
+                                            <Checkbox checked={false} color="error" onChange={(e) => console.log(e)} />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </>
                     ))}
