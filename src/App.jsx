@@ -21,6 +21,7 @@ const App = () => {
     } else {
       sports[sport.ID] = sport;
       sports[sport.ID].checked = true;
+      sports[sport.ID].indeterminate = false;
       Object.values(sports[sport.ID].Regions)
         .forEach(region => {
           region.checked = true;
@@ -34,14 +35,52 @@ const App = () => {
     setSports({ ...sports });
   };
 
+  const onSportCheck = (sportID, checked) => {
+    const sport = sports[sportID];
+    const regions = sport.Regions;
+
+    sport.checked = checked;
+    sport.indeterminate = false;
+
+    Object.values(regions).forEach(region => {
+      region.checked = checked;
+      region.indeterminate = false;
+
+      Object.values(region.champs).forEach(champ => champ.checked = checked);
+    });
+
+    setSports({ ...sports });
+  };
+
   const onRegionCheck = (sportID, regionID, checked) => {
-    sports[sportID].Regions[regionID].checked = checked;
+    const sport = sports[sportID];
+    const region = sport.Regions[regionID];
+    const champs = region.Champs;
+
+    region.checked = checked;
+    region.indeterminate = false;
+
+    Object.values(champs).forEach(champ => champ.checked = checked);
+
+    const isSportChecked = Object.values(sport.Regions).some(region => region.checked);
+    const isSportIndeterminate = isSportChecked && !Object.values(sport.Regions).every(region => region.checked);
+    sport.checked = isSportChecked;
+    sport.indeterminate = isSportIndeterminate;
 
     setSports({ ...sports });
   };
 
   const onChampCheck = (sportID, regionID, champID, checked) => {
-    sports[sportID].Regions[regionID].Champs[champID].checked = checked;
+    const sport = sports[sportID];
+    const region = sport.Regions[regionID];
+    const champs = region.Champs;
+
+    champs[champID].checked = checked;
+
+    const isRegionChecked = Object.values(champs).some(champ => champ.checked);
+    const isRegionIndeterminate = isRegionChecked && !Object.values(champs).every(champ => champ.checked);
+    region.checked = isRegionChecked;
+    region.indeterminate = isRegionIndeterminate;
 
     setSports({ ...sports });
   };
@@ -58,8 +97,10 @@ const App = () => {
               sport={sport.Name}
               games={sport.TotalGames}
               checked={sport.checked}
+              indeterminate={sport.indeterminate}
               onChampCheck={(regionID, champID, checked) => onChampCheck(sport.ID, regionID, champID, checked)}
               onRegionCheck={(regionID, checked) => onRegionCheck(sport.ID, regionID, checked)}
+              onSportCheck={(checked) => onSportCheck(sport.ID, checked)}
             />
           )}
         </aside>
@@ -70,9 +111,9 @@ const App = () => {
               {sport.Regions && (
                 <div className="list">
                   {Object.values(sport.Regions)
-                    .filter(region => region.checked === undefined || region.checked)
+                    .filter(region => region.checked)
                     .map(region => Object.values(region.Champs)
-                      .filter(champ => champ.checked === undefined || champ.checked)
+                      .filter(champ => champ.checked)
                       .map(champ => Object.values(champ.GameSmallItems).map(game => (
                         <div className="item" key={game.ID}>
                           <div className="content">

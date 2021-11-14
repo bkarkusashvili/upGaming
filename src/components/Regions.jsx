@@ -2,13 +2,11 @@ import { Checkbox, IconButton } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material';
 
-const Regions = ({ data, sport, games, checked, onChampCheck, onRegionCheck }) => {
+const Regions = ({ data, sport, games, checked, indeterminate, onChampCheck, onRegionCheck, onSportCheck }) => {
     const [openRegions, setOpenRegions] = useState({});
-    const [region, setRegion] = useState();
 
     const regions = useMemo(() => data && Object.values(data), [data]);
 
-    const toggleSport = e => data.checked = e.target.checked;
     const toggleRegionStatus = id => {
         openRegions[id] = !openRegions[id];
 
@@ -21,13 +19,18 @@ const Regions = ({ data, sport, games, checked, onChampCheck, onRegionCheck }) =
                 <div className="header">
                     <span>{sport}</span>
                     <div className="end">
-                        <Checkbox color="error" indeterminate={false} checked={checked} onChange={toggleSport} />
+                        <Checkbox
+                            color="error"
+                            indeterminate={indeterminate}
+                            checked={checked}
+                            onChange={(e) => onSportCheck(e.target.checked)}
+                        />
                         <span className="count">{games}</span>
                     </div>
                 </div>
                 <div className="list">
                     {regions.map(region => (
-                        <div key={region.ID} className="item" onClick={() => setRegion(region.ID)}>
+                        <div key={region.ID} className="item">
                             <div className="head">
                                 <div>
                                     <span country={region.KeyName.toLowerCase()} className="flag"></span>
